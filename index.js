@@ -1,6 +1,6 @@
 const Express = require('express');
 
-const questions = require('./questions');
+const questions = require('./src/questions');
 
 const getLastId = () => questions[questions.length - 1].id;
 
