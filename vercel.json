@@ -1,0 +1,15 @@
+{
+  "routes": [
+    { "src": "/api/.*", "dest": "/api/index.js" }
+  ],
+  "env": {
+    "API_KEY": "your-api-key",
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "command": "npm run build",
+    "sourcemap": true,
+    "base": "/public"
+  },
+  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
+}
