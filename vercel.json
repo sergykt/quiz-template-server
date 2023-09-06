@@ -1,7 +1,4 @@
 {
-  "routes": [
-    { "src": "/api/.*", "dest": "/api/index.js" }
-  ],
   "env": {
     "API_KEY": "your-api-key",
     "NODE_ENV": "production"
