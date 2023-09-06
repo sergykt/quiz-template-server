@@ -1,11 +1,14 @@
 {
   "name": "quiz-backend-express",
   "version": "1.0.0",
-  "description": "quiz backend express.js serverver",
+  "description": "quiz backend express.js server",
+  "bin": {
+    "start-server": "./api/index.js"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "npx start-server"
   },
   "author": "sergsivtsev",
   "license": "ISC",
