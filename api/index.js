@@ -4,18 +4,11 @@ const Express = require('express');
 const cors = require('cors');
 
 const data = require('./src/data');
+const routes = require('./src/routes.js');
+
 const { questions, categories } = data;
 
-const getLastId = () => questions[questions.length - 1]?.id || 1;
-
-const apiPath = '/api';
-
-const routes = {
-  data: () => [apiPath, 'data'].join('/'),
-  quiz: () => [apiPath, 'quiz'].join('/'),
-  questions: () => [apiPath, 'questions'].join('/'),
-  questionsEdit: () => [apiPath, 'questions/:id'].join('/'), 
-};
+const getLastId = (array) => array[array.length - 1]?.id || 1;
 
 const app = new Express();
 
@@ -34,7 +27,7 @@ app.get(routes.quiz(), (req, res) => {
 });
 
 app.post(routes.questions(), (req, res) => {
-  const id = getLastId() + 1;
+  const id = getLastId(questions) + 1;
   const { body } = req;
   const {
     text,
@@ -79,9 +72,13 @@ app.put(routes.questionsEdit(), (req, res) => {
 app.delete(routes.questionsEdit(), (req, res) => {
   const id = Number(req.params.id);
   const questionIndex = questions.findIndex((item) => item.id === id);
-  questions.splice(questionIndex, 1);
-  res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-  res.status(204).end();
+  if (questionIndex) {
+    questions.splice(questionIndex, 1);
+    res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
+    res.status(204).end();
+  } else {
+    res.status(400).end();
+  }
 });
 
 const PORT = process.env.PORT || 5001;
