@@ -70,7 +70,7 @@ app.put(routes.questionsEdit(), (req, res) => {
   if (text && answer && wrongAnswer && recommendation && category, answer !== wrongAnswer) {
     const data = { text, options: [answer, wrongAnswer], answer, recommendation, category, id };
     questions[questionIndex] = data;
-    res.status(204).end();
+    res.status(202).json(data);
   } else {
     res.status(400).end();
   }
