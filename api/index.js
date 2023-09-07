@@ -72,7 +72,7 @@ app.put(routes.questionsEdit(), (req, res) => {
 app.delete(routes.questionsEdit(), (req, res) => {
   const id = Number(req.params.id);
   const questionIndex = questions.findIndex((item) => item.id === id);
-  if (questionIndex) {
+  if (questionIndex >= 0) {
     questions.splice(questionIndex, 1);
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
     res.status(204).end();
