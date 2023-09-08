@@ -10,6 +10,8 @@ const { questions, categories } = data;
 
 const getLastId = (array) => array[array.length - 1]?.id || 1;
 
+const isInputNotEmpty = (...inputs) => inputs.every((item) => item.trim().length);
+
 const app = new Express();
 
 app.use(cors())
@@ -38,7 +40,8 @@ app.post(routes.questions(), (req, res) => {
   } = body;
 
   res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-  if (text && answer && wrongAnswer && recommendation && category && answer !== wrongAnswer) {
+
+  if (isInputNotEmpty(text, answer, wrongAnswer, recommendation, category) && answer !== wrongAnswer) {
     const data = { text, options: [answer, wrongAnswer], answer, recommendation, category, id };
     questions.push(data);
     res.status(201).json(data);
@@ -50,7 +53,9 @@ app.post(routes.questions(), (req, res) => {
 app.put(routes.questionsEdit(), (req, res) => {
   const id = Number(req.params.id);
   const questionIndex = questions.findIndex((item) => item.id === id);
+
   const { body } = req;
+
   const {
     text,
     answer,
@@ -60,7 +65,8 @@ app.put(routes.questionsEdit(), (req, res) => {
   } = body;
 
   res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-  if (text && answer && wrongAnswer && recommendation && category, answer !== wrongAnswer) {
+
+  if (isInputNotEmpty(text, answer, wrongAnswer, recommendation, category) && answer !== wrongAnswer && questionIndex >= 0) {
     const data = { text, options: [answer, wrongAnswer], answer, recommendation, category, id };
     questions[questionIndex] = data;
     res.status(202).json(data);
@@ -72,6 +78,7 @@ app.put(routes.questionsEdit(), (req, res) => {
 app.delete(routes.questionsEdit(), (req, res) => {
   const id = Number(req.params.id);
   const questionIndex = questions.findIndex((item) => item.id === id);
+  
   if (questionIndex >= 0) {
     questions.splice(questionIndex, 1);
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
