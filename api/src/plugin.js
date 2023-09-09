@@ -11,8 +11,7 @@ const plugin = async (app) => {
     const logger = morgan('combined');
     app.use(logger);
   
-    //const db = await pgp(dbPath);
-    const db = await pgb('postgres://default:gBGiZTOL96dw@ep-small-dawn-11427518-pooler.us-east-1.postgres.vercel-storage.com:5432/verceldb');
+    const db = await pgp(dbPath);
 
     console.log('Database connected successfully.');
 
