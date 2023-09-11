@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('dotenv').config();
 
 const Express = require('express');
 const plugin = require('./src/plugin');
