@@ -1,6 +1,6 @@
 const express = require('express');
 const { isInputNotEmpty, getCurrentTime } = require('../utilz/index');
-const { tables: { categoriesTableTable } } = require('../database');
+const { tables: { categoriesTable } } = require('../database');
 
 const categoryRouter = (db) => {
   const router = express.Router();
@@ -10,7 +10,7 @@ const categoryRouter = (db) => {
     const {
       name,
     } = body;
-  
+
     if (isInputNotEmpty(name)) {
       try {
         const result = await db.one(`INSERT INTO ${categoriesTable} (name) VALUES ($1) RETURNING id`, name);

@@ -13,7 +13,7 @@ const routes = {
   categories: () => [apiPath, 'categories'].join('/'),
 };
 
-const addRoutes = async (app, db) => {
+const addRoutes = (app, db) => {
   app.get(routes.data(), async (req, res) => {
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
     try {
@@ -30,8 +30,6 @@ const addRoutes = async (app, db) => {
 
   app.use(routes.questions(), questionRouter(db));
   app.use(routes.categories(), categoryRouter(db));
-
-  return app;
 };
 
 module.exports = addRoutes;
