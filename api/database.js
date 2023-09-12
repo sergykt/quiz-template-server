@@ -7,4 +7,11 @@ const port = process.env.POSTGRES_PORT;
 let dbPath = `postgres://${username}:${password}@${host}:${port}/${dbName}`;
 dbPath = process.env.NODE_ENV === 'production' ? `${dbPath}?sslmode=required` : dbPath;
 
-module.exports = dbPath;
+const tables = {
+  questionsTable: 'questions',
+  categoriesTable: 'categories',
+};
+
+const dbModule = { dbPath, tables };
+
+module.exports= dbModule;
