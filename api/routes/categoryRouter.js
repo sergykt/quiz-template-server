@@ -1,37 +1,11 @@
 const express = require('express');
-const { isInputNotEmpty, getCurrentTime } = require('../utilz/index');
-const { tables: { categoriesTable } } = require('../database');
+const { categoryController } = require('../controllers/controllers');
 
-const categoryRouter = (db) => {
-  const router = express.Router();
+const router = express.Router();
 
-  router.post('/', async (req, res) => {
-    const { body } = req;
-    const {
-      name,
-    } = body;
+router.get('/', categoryController.getAll);
+router.post('/', categoryController.create);
+router.put('/:id', categoryController.update);
+router.delete('/:id', categoryController.delete);
 
-    if (isInputNotEmpty(name)) {
-      try {
-        const result = await db.one(`INSERT INTO ${categoriesTable} (name) VALUES ($1) RETURNING id`, name);
-        console.log(`[${getCurrentTime()}] Вставлен новый ряд категории с ID: ${result.id}.`);
-        res.status(201).end();
-      } catch (err) {
-        if (err.code === '23505') {
-          console.error(`[${getCurrentTime()}] Такая категория уже существует.`);
-          res.status(400).json({ error: 'This Category Already Exists' });
-        } else {
-          console.error(`[${getCurrentTime()}] Произошла ошибка при вставке данных: ${err}.`);
-          res.status(500).end();
-        }
-      };
-    } else {
-      console.error(`[${getCurrentTime()}] Невалидные данные: ${err}.`);
-      res.status(400).end();
-    }
-  });
-
-  return router;
-};
-
-module.exports = categoryRouter;
+module.exports = router;

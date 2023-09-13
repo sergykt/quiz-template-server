@@ -1,3 +1,5 @@
+const pgp = require('pg-promise')();
+
 const dbName = process.env.POSTGRES_DATABASE;
 const username = process.env.POSTGRES_USER;
 const password = process.env.POSTGRES_PASSWORD;
@@ -12,6 +14,6 @@ const tables = {
   categoriesTable: 'categories',
 };
 
-const dbModule = { dbPath, tables };
+const db = pgp(dbPath);
 
-module.exports= dbModule;
+module.exports= { db, tables };
