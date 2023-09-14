@@ -1,7 +1,5 @@
-const { questionModel, categoryModel } = require('../models/models');
+const { questionModel, categoryModel, userModel } = require('../models/models');
 const { isInputNotEmpty, getCurrentTime } = require('../utilz/index');
-const { db, tables } = require('../database');
-const { questionsTable, categoriesTable } = tables;
 
 class QuestionController {
   async getAll(req, res) {
@@ -36,7 +34,7 @@ class QuestionController {
       res.status(201).end();
     } catch (err) {
       if (err.code === '23505') {
-        console.error(`[${getCurrentTime()}] Такой вопрос уже существует.`);
+        console.error(`[${getCurrentTime()}] Данный вопрос уже существует.`);
         res.status(400).json({ error: 'This Question Already Exists' });
       } if (err.message === 'Invalid data') {
         console.error(`[${getCurrentTime()}] Невалидные данные: ${err}.`);
@@ -53,16 +51,17 @@ class QuestionController {
     const { body } = req;
 
     try {
-      const rowCount = await questionModel.update(id, body);
-      if (rowCount) {
+      const result = await questionModel.update(id, body);
+      if (result) {
         console.log(`[${getCurrentTime()}] Успешно изменен ряд с ID: ${id}.`);
         res.status(204).end();
       } else {
+        console.error(`[${getCurrentTime()}] Данный вопрос не существует`);
         res.status(400).json({ error: "This Questions Doesn't Exist" });
       }
     } catch (err) {
       if (err.code === '23505') {
-        console.error(`[${getCurrentTime()}] Такой вопрос уже существует.`);
+        console.error(`[${getCurrentTime()}] Данный вопрос уже существует.`);
         res.status(400).json({ error: 'This Question Already Exists' });
       } if (err.message === 'Invalid data') {
         console.error(`[${getCurrentTime()}] Невалидные данные: ${err}.`);
@@ -77,13 +76,13 @@ class QuestionController {
   async delete(req, res) {
     const id = req.params.id;
     try {
-      const rowCount = await questionModel.delete(id);
-      if (rowCount) {
+      const result = await questionModel.delete(id);
+      if (result) {
         console.log(`[${getCurrentTime()}] Успешно удален ряд с ID: ${id}.`);
         res.status(204).end();
       } else {
         console.error(`[${getCurrentTime()}] Ошибка: Ни одна запись не была удалена.`);
-        res.status(400).json({ error: 'This Question Already Deleted' });
+        res.status(400).json({ error: "This Question Doesn't Exist" });
       }
     } catch (err) {
       if (err.message === 'Invalid data') {
@@ -118,7 +117,7 @@ class CategoryController {
       res.status(201).end();
     } catch (err) {
       if (err.code === '23505') {
-        console.error(`[${getCurrentTime()}] Такая категория уже существует.`);
+        console.error(`[${getCurrentTime()}] Данная категория уже существует.`);
         res.status(400).json({ error: 'This Category Already Exists' });
       } else if (err.message === 'Invalid data') {
         console.error(`[${getCurrentTime()}] Невалидные данные: ${err}.`);
@@ -133,40 +132,40 @@ class CategoryController {
   async update(req, res) {
     const id = req.params.id;
     const { body } = req;
-    const {
-      name
-    } = body;
 
-    if (isInputNotEmpty(name)) {
-      try {
-        const result = await questionModel.update(id, body);
+    try {
+      const result = await categoryModel.update(id, body);
+      if (result) {
         console.log(`[${getCurrentTime()}] Успешно изменен ряд категории с ID: ${id}.`);
         res.status(204).end();
-      } catch (err) {
-        if (err.code === '23505') {
-          console.error(`[${getCurrentTime()}] Такая категория уже существует.`);
-          res.status(400).json({ error: 'This Category Already Exists' });
-        } else {
-          console.error(`[${getCurrentTime()}] Произошла ошибка при вставке данных: ${err}.`);
-          res.status(500).end();
-        }
-      };
-    } else {
-      console.error(`[${getCurrentTime()}] Невалидные данные: ${err}.`);
-      res.status(400).end();
-    }
+      } else {
+        console.error(`[${getCurrentTime()}] Данная категория не существует`);
+        res.status(400).json({ error: "This Category Doesn't Exist" });
+      }
+    } catch (err) {
+      if (err.code === '23505') {
+        console.error(`[${getCurrentTime()}] Данная категория уже существует.`);
+        res.status(400).json({ error: 'This Category Already Exists' });
+      } else if (err.message === 'Invalid Data') {
+        console.error(`[${getCurrentTime()}] Невалидные данные: ${err}.`);
+        res.status(400).end();
+      } else {
+        console.error(`[${getCurrentTime()}] Произошла ошибка при вставке данных: ${err}.`);
+        res.status(500).end();
+      }
+    };
   }
 
   async delete(req, res) {
     const id = req.params.id;
     try {
-      const rowCount = await categoryModel.delete(id);
-      if (rowCount) {
-        console.log(`[${getCurrentTime()}] Успешно удален ряд с ID: ${id}.`);
+      const result = await categoryModel.delete(id);
+      if (result) {
+        console.log(`[${getCurrentTime()}] Успешно удален ряд категории с ID: ${id}.`);
         res.status(204).end();
       } else {
         console.error(`[${getCurrentTime()}] Ошибка: Ни одна запись не была удалена.`);
-        res.status(400).json({ error: 'This Question Already Deleted' });
+        res.status(400).json({ error: "This Category Doesn't Exist" });
       }
     } catch (err) {
       if (err.message === 'Invalid data') {
@@ -180,5 +179,46 @@ class CategoryController {
   }
 };
 
+class UserController {
+  async create(req, res) {
+    const { body } = req;
+    try {
+      const newId = await userModel.create(body);
+      console.log(`[${getCurrentTime()}] Создан новый пользователь с ID: ${newId}.`);
+      res.status(201).end();
+    } catch (err) {
+      if (err.code === '23505') {
+        console.error(`[${getCurrentTime()}] Данный логин уже зарегистрирован.`);
+        res.status(400).json({ error: 'This Username is not available' });
+      } else if (err.message === 'Invalid data') {
+        console.error(`[${getCurrentTime()}] Невалидные данные: ${err}.`);
+        res.status(400).end();
+      } else {
+        console.error(`[${getCurrentTime()}] Произошла ошибка при вставке данных: ${err}.`);
+        res.status(500).end();
+      }
+    }
+  }
+
+  async login(req, res) {
+    const { body } = req;
+    const { username } = body;
+    try {
+      const result = await userModel.login(body);
+      if (result) {
+        console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
+        res.status(200).end();
+      } else {
+        console.error(`[${getCurrentTime()}] Неправильный пароль пользователя ${username}`);
+        res.status(401).end();
+      }
+    } catch (err) {
+      console.error(`[${getCurrentTime()}] Произошла ошибка при авторизации ${err}.`);
+      res.status(500).end();
+    }
+  }
+}
+
 module.exports.questionController = new QuestionController();
 module.exports.categoryController = new CategoryController();
+module.exports.userController = new UserController();

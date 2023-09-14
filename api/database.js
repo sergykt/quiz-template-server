@@ -12,6 +12,8 @@ dbPath = process.env.NODE_ENV === 'production' ? `${dbPath}?sslmode=required` : 
 const tables = {
   questionsTable: 'questions',
   categoriesTable: 'categories',
+  usersTable: 'users',
+  userRolesTable: 'user_roles',
 };
 
 const db = pgp(dbPath);

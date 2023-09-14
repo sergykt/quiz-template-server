@@ -1,7 +1,13 @@
+const bcrypt = require('bcryptjs');
 const { isInputNotEmpty, getCurrentTime } = require('../utilz/index');
 const { db, tables } = require('../database');
 
-const { questionsTable, categoriesTable } = tables;
+const {
+  questionsTable,
+  categoriesTable,
+  usersTable,
+  userRolesTable,
+} = tables;
 
 class QuestionModel {
   constructor(table) {
@@ -46,7 +52,7 @@ class QuestionModel {
         throw err;
       };
     } else {
-      throw new Error('Invalid data');
+      throw new Error('Invalid Data');
     }
   }
 
@@ -67,12 +73,12 @@ class QuestionModel {
           `UPDATE ${this.table} SET text = $1, options = $2, answer = $3, recommendation = $4, category_id = $5 WHERE id = $6`,
           [text, options, answer, recommendation, category_id, id]
         );
-        return result.rowCount;
+        return result.rowCount > 0;
       } catch (err) {
         throw err;
       };
     } else {
-      throw new Error('Invalid data');
+      throw new Error('Invalid Data');
     }
   }
 
@@ -80,12 +86,12 @@ class QuestionModel {
     if (id) {
       try {
         const result = await db.result(`DELETE FROM ${this.table} WHERE id = $1`, id);
-        return result.rowCount;
+        return result.rowCount > 0;
       } catch (err) {
         throw err;
       }
     } else {
-      throw new Error('Invalid data');
+      throw new Error('Invalid Data');
     }
   }
 }
@@ -113,7 +119,7 @@ class CategoryModel {
         throw err;
       };
     } else {
-      throw new Error('Invalid data');
+      throw new Error('Invalid Data');
     }
   }
 
@@ -122,12 +128,12 @@ class CategoryModel {
     if (name) {
       try {
         const result = await db.result(`UPDATE ${this.table} SET name = $1 WHERE id = $2`, [name, id]);
-        return result.rowCount;
+        return result.rowCount > 0;
       } catch (err) {
         throw err;
       };
     } else {
-      throw new Error('Invalid data');
+      throw new Error('Invalid Data');
     }
   }
 
@@ -135,15 +141,55 @@ class CategoryModel {
     if (id) {
       try {
         const result = await db.result(`DELETE FROM ${this.table} WHERE id = $1`, id);
-        return result.rowCount;
+        return result.rowCount > 0;
       } catch (err) {
         throw err;
       }
     } else {
-      throw new Error('Invalid data');
+      throw new Error('Invalid Data');
+    }
+  }
+}
+
+class UserModel {
+  constructor(table) {
+    this.table = table;
+  }
+
+  getAll = async() => {
+    try {
+      return await db.any(`SELECT * FROM ${this.table} ORDER BY id ASC`);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  create = async(body) => {
+    const { username, password } = body;
+    const category_id = body.category_id || 2;
+    try {
+      const hashPassword = await bcrypt.hash(password, 8);
+      const result = await db.one(
+        `INSERT INTO ${this.table} (username, password, user_role_id) VALUES ($1, $2, $3) RETURNING id`,
+        [username, hashPassword, category_id]
+      );
+      return result.id;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  login = async(body) => {
+    const { username, password } = body;
+    try {
+      const currentPassword = await db.one(`SELECT password FROM ${this.table} WHERE username = $1`, username);
+      return await bcrypt.compare(password, currentPassword.password);
+    } catch (err) {
+      throw err;
     }
   }
 }
 
 module.exports.questionModel = new QuestionModel(questionsTable);
 module.exports.categoryModel = new CategoryModel(categoriesTable);
+module.exports.userModel = new UserModel(usersTable);

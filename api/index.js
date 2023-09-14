@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const start = async () => {
+const start = async() => {
   try {
     const preparedServer = await plugin(app);
     preparedServer.listen(PORT);
