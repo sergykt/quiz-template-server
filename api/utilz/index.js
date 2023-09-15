@@ -1,4 +1,5 @@
-const isInputNotEmpty = (...inputs) => inputs.every((item) => item?.trim().length);
+const jwt = require('jsonwebtoken');
+const { secretKey } = require('../config');
 
 const getCurrentTime = () => {
   const now = new Date();
@@ -8,6 +9,11 @@ const getCurrentTime = () => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
-const utilz = { isInputNotEmpty, getCurrentTime };
+const generateAccessToken = (id, userRoleId) => {
+  const payload = { id, userRoleId };
+  return jwt.sign(payload, secretKey, { expiresIn: '24h' });
+};
+
+const utilz = { getCurrentTime, generateAccessToken };
 
 module.exports = utilz;

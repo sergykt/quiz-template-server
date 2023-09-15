@@ -1,6 +1,7 @@
 const questionRouter = require('./questionRouter');
 const categoryRouter = require('./categoryRouter');
 const userRouter = require('./userRouter');
+const { trimFields } = require('../middlewares/middlewares');
 const { getCurrentTime } = require('../utilz/index');
 
 const apiPath = '/api';
@@ -13,6 +14,7 @@ const routes = {
 };
 
 const addRoutes = (app) => {
+  app.use(trimFields);
   app.use(routes.questions(), questionRouter);
   app.use(routes.categories(), categoryRouter);
   app.use(routes.users(), userRouter);
