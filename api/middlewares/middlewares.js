@@ -23,7 +23,11 @@ const authMiddleware = (req, res, next) => {
       return res.status(403).end();
     }
     const decodedData = jwt.verify(token, secretKey);
-    req.user = decodedData;
+    const { userRoleId } = decodedData;
+    if (userRoleId !== '1') {
+      console.error(`[${getCurrentTime()}] Доступ запрещен`);
+      return res.status(403).end();
+    }
     next();
   } catch (err) {
     console.error(`[${getCurrentTime()}] Доступ запрещен`);
