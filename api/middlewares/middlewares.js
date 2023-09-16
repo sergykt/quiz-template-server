@@ -19,13 +19,14 @@ const authMiddleware = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
+      console.error(`[${getCurrentTime()}] Доступ запрещен`);
       return res.status(403).end();
     }
     const decodedData = jwt.verify(token, secretKey);
     req.user = decodedData;
     next();
   } catch (err) {
-    console.error(`[${getCurrentTime()}] Авторизация неуспешна`);
+    console.error(`[${getCurrentTime()}] Доступ запрещен`);
     return res.status(403).end();
   }
 };

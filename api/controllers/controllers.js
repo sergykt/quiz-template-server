@@ -168,9 +168,11 @@ class UserController {
   async create(req, res) {
     const { body } = req;
     try {
-      const newId = await userModel.create(body);
-      console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newId}.`);
-      return res.status(201).end();
+      const newUser = await userModel.create(body);
+      const { id, user_role_id: userRoleId } = newUser;
+      const token = generateAccessToken(id, userRoleId);
+      console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newUser.id}.`);
+      return res.status(201).send(token);
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Пользователь с таким именем уже зарегистрирован.`);
@@ -190,7 +192,7 @@ class UserController {
         const { id, user_role_id: userRoleId } = result;
         const token = generateAccessToken(id, userRoleId);
         console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
-        return res.status(200).json({ token, username });
+        return res.status(200).send(token);
       }
       console.error(`[${getCurrentTime()}] Неправильный пароль пользователя ${username}`);
       return res.status(401).json();

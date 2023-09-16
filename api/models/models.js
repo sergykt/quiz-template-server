@@ -144,10 +144,10 @@ class UserModel {
     try {
       const hashPassword = await bcrypt.hash(password, 8);
       const result = await db.one(
-        `INSERT INTO ${this.table} (username, password, user_role_id) VALUES ($1, $2, $3) RETURNING id`,
+        `INSERT INTO ${this.table} (username, password, user_role_id) VALUES ($1, $2, $3) RETURNING id, user_role_id`,
         [username, hashPassword, userRoleId]
       );
-      return result.id;
+      return result;
     } catch (err) {
       throw err;
     }
