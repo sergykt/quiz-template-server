@@ -34,7 +34,7 @@ class QuestionController {
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Данный вопрос уже существует.`);
-        return res.status(400).json({ errors: 'This Question Already Exists' });
+        return res.status(409).json({ errors: 'This Question Already Exists' });
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при добавлении вопроса: ${err}.`);
       return res.status(500).end();
@@ -52,11 +52,11 @@ class QuestionController {
         return res.status(204).end();
       }
       console.error(`[${getCurrentTime()}] Данный вопрос не существует`);
-      return res.status(400).json({ errors: "This Questions Doesn't Exist" });
+      return res.status(404).json({ errors: "This Questions Doesn't Exist" });
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Данный вопрос уже существует.`);
-        return res.status(400).json({ errors: 'This Question Already Exists' });
+        return res.status(409).json({ errors: 'This Question Already Exists' });
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при изменении вопроса с ID: ${id} ${err}.`);
       return res.status(500).end();
@@ -72,7 +72,7 @@ class QuestionController {
         return res.status(204).end();
       }
       console.error(`[${getCurrentTime()}] Данный вопрос не существует`);
-      return res.status(400).json({ errors: "This Question Doesn't Exist" });
+      return res.status(404).json({ errors: "This Question Doesn't Exist" });
     } catch (err) {
       console.error(`[${getCurrentTime()}] Произошла ошибка при удалении вопроса с ID: ${id} ${err}.`);
       return res.status(500).end();
@@ -102,7 +102,7 @@ class CategoryController {
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Данная категория уже существует.`);
-        return res.status(400).json({ errors: 'This Category Already Exists' });
+        return res.status(409).json({ errors: 'This Category Already Exists' });
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при добавлении категории: ${err}.`);
       return res.status(500).end();
@@ -120,11 +120,11 @@ class CategoryController {
         return res.status(204).end();
       }
       console.error(`[${getCurrentTime()}] Данная категория не существует`);
-      return res.status(400).json({ errors: "This Category Doesn't Exist" });
+      return res.status(404).json({ errors: "This Category Doesn't Exist" });
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Данная категория уже существует.`);
-        return res.status(400).json({ errors: 'This Category Already Exists' });
+        return res.status(409).json({ errors: 'This Category Already Exists' });
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при изменеии категории с ID: ${id} ${err}.`);
       return res.status(500).end();
@@ -140,8 +140,12 @@ class CategoryController {
         return res.status(204).end();
       }
       console.error(`[${getCurrentTime()}] Данный вопрос не существует`);
-      return res.status(400).json({ errors: "This Category Doesn't Exist" });
+      return res.status(404).json({ errors: "This Category Doesn't Exist" });
     } catch (err) {
+      if (err.code === '23503') {
+        console.error(`[${getCurrentTime()}] Категорию с ID: ${id} нельзя удалить, поскольку с ней еще связаны вопросы`);
+        return res.status(409).json({ errors: 'The category cannot be deleted because it is still referenced by questions.' });
+      }
       console.error(`[${getCurrentTime()}] Произошла ошибка при удалении категории с ID: ${id} ${err}.`);
       return res.status(500).end();
     }
@@ -150,7 +154,6 @@ class CategoryController {
 
 class UserController {
   async getAll(req, res) {
-    console.log(req.user);
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
     try {
       const users = await userModel.getAll();
@@ -171,7 +174,7 @@ class UserController {
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Пользователь с таким именем уже зарегистрирован.`);
-        return res.status(400).json({ errors: 'This Username is not available' });
+        return res.status(409).json({ errors: 'This Username is not available' });
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при регистрации пользователя: ${err}.`);
       return res.status(500).end();
@@ -210,7 +213,7 @@ class UserController {
         return res.status(204).end();
       }
       console.error(`[${getCurrentTime()}] Данный пользователь не существует`);
-      return res.status(400).json({ errors: "This User Doesn't Exist" });
+      return res.status(404).json({ errors: "This User Doesn't Exist" });
     } catch (err) {
       console.error(`[${getCurrentTime()}] Произошла ошибка при удалении пользователя с ID: ${id} ${err}.`);
       return res.status(500).end();
