@@ -7,10 +7,7 @@ const plugin = async (app) => {
   try {
     const allowedOrigins = 'https://quiz-template-seven.vercel.app';
     const corsOptions = {
-      origin: function(origin, callback){
-        return callback(null, true);
-      },
-      optionsSuccessStatus: 200,
+      origin: allowedOrigins,
       credentials: true,
     };
 
