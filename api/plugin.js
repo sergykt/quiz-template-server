@@ -3,7 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const addRoutes = require('./routes/index');
 
-const plugin = async(app) => {
+const plugin = async (app) => {
   try {
     app.use(cors({ credentials: true }));
     app.use(cookieParser());
