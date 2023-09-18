@@ -10,9 +10,9 @@ const plugin = async (app) => {
       origin: allowedOrigins,
       credentials: true,
     };
-    
-    app.use(cors(corsOptions));
+
     app.use(cookieParser());
+    app.use(cors(corsOptions));
     app.use(morgan('combined'));
     await addRoutes(app);
 
