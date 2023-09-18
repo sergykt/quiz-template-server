@@ -5,6 +5,7 @@ const {
   questionsTable,
   categoriesTable,
   usersTable,
+  tokensTable,
 } = tables;
 
 class QuestionModel {
@@ -130,6 +131,15 @@ class UserModel {
     this.table = table;
   }
 
+  get = async (id) => {
+    try {
+      const userData = await db.any(`SELECT * FROM ${this.table} WHERE id = $1`, id);
+      return userData.length > 0 ? userData[0] : null;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   getAll = async () => {
     try {
       return await db.any(`SELECT * FROM ${this.table} ORDER BY id ASC`);
@@ -144,7 +154,7 @@ class UserModel {
     try {
       const hashPassword = await bcrypt.hash(password, 8);
       const result = await db.one(
-        `INSERT INTO ${this.table} (username, password, user_role_id) VALUES ($1, $2, $3) RETURNING id, user_role_id`,
+        `INSERT INTO ${this.table} (username, password, user_role_id) VALUES ($1, $2, $3) RETURNING id, user_role_id, username`,
         [username, hashPassword, userRoleId]
       );
       return result;
@@ -158,7 +168,10 @@ class UserModel {
     try {
       const currentUser = await db.one(`SELECT * FROM ${this.table} WHERE username = $1`, username);
       const auth = await bcrypt.compare(password, currentUser.password);
-      return auth ? currentUser : null;
+      if (!auth) {
+        throw new Error('Wrong password');
+      }
+      return currentUser;
     } catch (err) {
       throw err;
     }
@@ -174,6 +187,61 @@ class UserModel {
   }
 }
 
+class TokenModel {
+  constructor(table) {
+    this.table = table;
+  }
+
+  get = async (userId) => {
+    try {
+      const user = await db.any(`SELECT * FROM ${this.table} WHERE user_id = $1`, userId);
+      return user.length > 0 ? user[0] : null;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  create = async (userId, refreshToken) => {
+    try {
+      await db.one(
+        `INSERT INTO ${this.table} (user_id, refresh_token) VALUES ($1, $2) returning user_id`,
+        [userId, refreshToken]
+      );
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  update = async (userId, refreshToken) => {
+    try {
+      await db.none(
+        `UPDATE ${this.table} SET refresh_token = $1 WHERE user_id = $2`,
+        [refreshToken, userId]
+      );
+    } catch (err) {
+      throw err;
+    };
+  };
+
+  delete = async (userId) => {
+    try {
+      const result = await db.result(`DELETE FROM ${this.table} WHERE user_id = $1`, userId);
+      return result.rowCount > 0;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  findToken = async (refreshToken) => {
+    try {
+      return await db.one(`SELECT * FROM ${this.table} WHERE refresh_token = $1`, refreshToken);
+    } catch (err) {
+      throw err;
+    }
+  }
+}
+
 module.exports.questionModel = new QuestionModel(questionsTable);
 module.exports.categoryModel = new CategoryModel(categoriesTable);
 module.exports.userModel = new UserModel(usersTable);
+module.exports.tokenModel = new TokenModel(tokensTable);

@@ -2,7 +2,7 @@ const questionRouter = require('./questionRouter');
 const categoryRouter = require('./categoryRouter');
 const userRouter = require('./userRouter');
 const { trimFields } = require('../middlewares/middlewares');
-const { getCurrentTime } = require('../utilz/index');
+const { getCurrentTime } = require('../services/services');
 
 const apiPath = '/api';
 

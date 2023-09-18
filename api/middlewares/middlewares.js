@@ -1,7 +1,5 @@
-const jwt = require('jsonwebtoken')
 const { check, param, validationResult } = require('express-validator');
-const { secretKey } = require('../config');
-const { getCurrentTime } = require('../utilz/index');
+const { getCurrentTime, tokenService } = require('../services/services');
 
 const trimFields = (req, res, next) => {
   for (const key in req.body) {
@@ -19,19 +17,19 @@ const authMiddleware = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-      console.error(`[${getCurrentTime()}] Доступ запрещен`);
-      return res.status(403).end();
+      console.error(`[${getCurrentTime()}] Пользователь не авторизован`);
+      return res.status(401).end();
     }
-    const decodedData = jwt.verify(token, secretKey);
-    const { userRoleId } = decodedData;
-    if (userRoleId !== '1') {
-      console.error(`[${getCurrentTime()}] Доступ запрещен`);
-      return res.status(403).end();
-    }
+    const decodedData = tokenService.validateAccessToken(token);
+    // const { userRoleId } = decodedData;
+    // if (userRoleId !== '1') {
+    //   console.error(`[${getCurrentTime()}] Доступ запрещен`);
+    //   return res.status(403).end();
+    // }
     next();
   } catch (err) {
-    console.error(`[${getCurrentTime()}] Доступ запрещен`);
-    return res.status(403).end();
+    console.error(`[${getCurrentTime()}] Пользователь не авторизован`);
+    return res.status(401).end();
   }
 };
 

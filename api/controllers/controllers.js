@@ -1,5 +1,5 @@
-const { questionModel, categoryModel, userModel } = require('../models/models');
-const { getCurrentTime, generateAccessToken } = require('../utilz/index');
+const { questionModel, categoryModel, userModel, tokenModel } = require('../models/models');
+const { getCurrentTime, tokenService } = require('../services/services');
 
 class QuestionController {
   async getAll(req, res) {
@@ -169,10 +169,12 @@ class UserController {
     const { body } = req;
     try {
       const newUser = await userModel.create(body);
-      const { id, user_role_id: userRoleId } = newUser;
-      const token = generateAccessToken(id, userRoleId);
+      const { id, user_role_id: userRoleId, username } = newUser;
+      const token = tokenService.generateAccessTokens({ id, userRoleId });
+      await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newUser.id}.`);
-      return res.status(201).send(token);
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Пользователь с таким именем уже зарегистрирован.`);
@@ -187,22 +189,34 @@ class UserController {
     const { body } = req;
     const { username } = body;
     try {
-      const result = await userModel.login(body);
-      if (result) {
-        const { id, user_role_id: userRoleId } = result;
-        const token = generateAccessToken(id, userRoleId);
-        console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
-        return res.status(200).send(token);
-      }
-      console.error(`[${getCurrentTime()}] Неправильный пароль пользователя ${username}`);
-      return res.status(401).json();
+      const user = await userModel.login(body);
+      const { id, user_role_id: userRoleId } = user;
+      const token = tokenService.generateAccessTokens({ id, userRoleId });
+      await tokenService.saveToken(id, token.refreshToken);
+      console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
-      if (err.message === 'No data returned from the query.') {
-        console.error(`[${getCurrentTime()}] Пользователь ${username} не существует`);
+      if (err.message === 'No data returned from the query.' || err.message === 'Wrong password') {
+        console.error(`[${getCurrentTime()}] Неверные данные при выполнении входа ${username}`);
         return res.status(401).json();
       }
-      console.error(`[${getCurrentTime()}] Произошла ошибка при авторизации ${err}.`);
+      console.error(`[${getCurrentTime()}] Произошла ошибка при авторизации ${username} ${err}.`);
       return res.status(500).end();
+    }
+  }
+
+  async logout(req, res) {
+    try {
+      const { refreshToken } = req.cookies;
+      const token = await tokenModel.findToken(refreshToken);
+      const { user_id: userId } = token;
+      await tokenModel.delete(userId);
+      console.log(`[${getCurrentTime()}] Выполнен выход пользователя с ID: ${userId}`);
+      res.clearCookie('refreshToken');
+      return res.status(200).end();
+    } catch (err) {
+      console.error(`[${getCurrentTime()}] Произошла ошибка при выходе пользователя ${err}.`);
     }
   }
 
@@ -210,6 +224,7 @@ class UserController {
     const id = req.params.id;
     try {
       const result = await userModel.delete(id);
+      await tokenModel.delete(id);
       if (result) {
         console.log(`[${getCurrentTime()}] Успешно удален пользователь с ID: ${id}.`);
         return res.status(204).end();
@@ -218,6 +233,27 @@ class UserController {
       return res.status(404).json({ errors: "This User Doesn't Exist" });
     } catch (err) {
       console.error(`[${getCurrentTime()}] Произошла ошибка при удалении пользователя с ID: ${id} ${err}.`);
+      return res.status(500).end();
+    }
+  }
+
+  async refresh(req, res) {
+    try {
+      const { refreshToken } = req.cookies;
+      const userData = await tokenService.validateRefreshToken(refreshToken);
+      const user = await userModel.get(userData.id);
+      const { id, user_role_id: userRoleId, username } = user;
+      const token = tokenService.generateAccessTokens({ id, userRoleId });
+      await tokenService.saveToken(id, token.refreshToken);
+      console.log(`[${getCurrentTime()}] Успешно обновлен access token `);
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      return res.status(200).json({ accessToken: token.accessToken, username });
+    } catch (err) {
+      if (err.message === 'Not valid refresh token') {
+        console.error(`[${getCurrentTime()}] Невалидный refresh token ${err}.`);
+        return res.status(401).end();
+      }
+      console.error(`[${getCurrentTime()}] Произошла ошибка при проверке refresh token ${err}.`);
       return res.status(500).end();
     }
   }
