@@ -217,6 +217,7 @@ class UserController {
       return res.status(200).end();
     } catch (err) {
       console.error(`[${getCurrentTime()}] Произошла ошибка при выходе пользователя ${err}.`);
+      return res.status(500).end();
     }
   }
 
