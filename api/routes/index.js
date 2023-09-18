@@ -8,7 +8,7 @@ const apiPath = '/api';
 
 const routes = {
   questions: () => [apiPath, 'questions'].join('/'),
-  categories: () => [apiPath, 'categories'].join('/'),
+  categories: () => [apiPath, 'categoriess'].join('/'),
   users: () => [apiPath, 'users'].join('/'),
   userRoles: () => [apiPath, 'user_roles'].join('/'),
 };
