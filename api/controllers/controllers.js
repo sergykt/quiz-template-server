@@ -173,7 +173,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newUser.id}.`);
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.code === '23505') {
@@ -194,7 +194,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.message === 'No data returned from the query.' || err.message === 'Wrong password') {
@@ -247,7 +247,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Успешно обновлен access token `);
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.message === 'Not valid refresh token') {
