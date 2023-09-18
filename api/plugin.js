@@ -5,10 +5,10 @@ const addRoutes = require('./routes/index');
 
 const plugin = async (app) => {
   try {
-    const allowedOrigins = ['https://quiz-template-seven.vercel.app']
+    const allowedOrigins = ['https://quiz-template-seven.vercel.app'];
     const corsOptions = {
       origin: allowedOrigins,
-      credentials: true,
+      credentials: true
     };
 
     app.use(cookieParser());
