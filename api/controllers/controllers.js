@@ -1,8 +1,6 @@
 const { questionModel, categoryModel, userModel, tokenModel } = require('../models/models');
 const { getCurrentTime, tokenService } = require('../services/services');
 
-const domain = process.env.NODE_ENV === 'production' ? '.quiz-template-server.vercel.app' : '.localhost';
-
 class QuestionController {
   async getAll(req, res) {
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
