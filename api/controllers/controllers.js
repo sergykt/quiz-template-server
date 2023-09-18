@@ -215,7 +215,7 @@ class UserController {
       const { user_id: userId } = token;
       await tokenModel.delete(userId);
       console.log(`[${getCurrentTime()}] Выполнен выход пользователя с ID: ${userId}`);
-      res.clearCookie('refreshToken');
+      res.clearCookie('refreshToken', { sameSite: 'none' });
       return res.status(200).end();
     } catch (err) {
       console.error(`[${getCurrentTime()}] Произошла ошибка при выходе пользователя ${err}.`);
