@@ -1,6 +1,8 @@
 const { questionModel, categoryModel, userModel, tokenModel } = require('../models/models');
 const { getCurrentTime, tokenService } = require('../services/services');
 
+const domain = process.env.NODE_ENV === 'production' ? '.quiz-template-server.vercel.app' : '.localhost';
+
 class QuestionController {
   async getAll(req, res) {
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
@@ -173,8 +175,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newUser.id}.`);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, domain, httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.code === '23505') {
@@ -195,8 +196,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, domain, httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.message === 'No data returned from the query.' || err.message === 'Wrong password') {
@@ -215,7 +215,6 @@ class UserController {
       const { user_id: userId } = token;
       await tokenModel.delete(userId);
       console.log(`[${getCurrentTime()}] Выполнен выход пользователя с ID: ${userId}`);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.clearCookie('refreshToken');
       return res.status(200).end();
     } catch (err) {
@@ -250,8 +249,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Успешно обновлен access token `);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, domain, httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.message === 'Not valid refresh token') {
