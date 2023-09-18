@@ -5,7 +5,7 @@ const addRoutes = require('./routes/index');
 
 const plugin = async(app) => {
   try {
-    app.use(cors());
+    app.use(cors({ credentials: true }));
     app.use(cookieParser());
     app.use(morgan('combined'));
     await addRoutes(app);
