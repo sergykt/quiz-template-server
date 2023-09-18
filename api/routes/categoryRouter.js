@@ -4,7 +4,7 @@ const { categoryMiddleware, authMiddleware } = require('../middlewares/middlewar
 
 const router = express.Router();
 
-router.get('/', authMiddleware, categoryController.getAll);
+router.get('/', categoryController.getAll);
 router.post('/', authMiddleware, categoryMiddleware.validateCreate, categoryController.create);
 router.put('/:id', authMiddleware, categoryMiddleware.validateUpdate, categoryController.update);
 router.delete('/:id', authMiddleware, categoryMiddleware.validateDelete, categoryController.delete);

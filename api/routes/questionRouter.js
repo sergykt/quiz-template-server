@@ -4,7 +4,7 @@ const { questionMiddleware, authMiddleware } = require('../middlewares/middlewar
 
 const router = express.Router();
 
-router.get('/', authMiddleware, questionController.getAll);
+router.get('/', questionController.getAll);
 router.get('/quiz', questionController.getQuiz);
 router.post('/', authMiddleware, questionMiddleware.validateCreate, questionController.create);
 router.put('/:id', authMiddleware, questionMiddleware.validateUpdate, questionController.update);
