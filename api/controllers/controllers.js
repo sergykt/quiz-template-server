@@ -256,6 +256,7 @@ class UserController {
     } catch (err) {
       if (err.message === 'Not valid refresh token') {
         console.error(`[${getCurrentTime()}] Невалидный refresh token ${err}.`);
+        res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'None', secure: true });
         return res.status(401).end();
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при проверке refresh token ${err}.`);
