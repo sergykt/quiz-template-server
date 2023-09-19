@@ -209,13 +209,17 @@ class UserController {
   async logout(req, res) {
     try {
       const { refreshToken } = req.cookies;
+      res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'none', secure: true });
       const token = await tokenModel.findToken(refreshToken);
       const { user_id: userId } = token;
       await tokenModel.delete(userId);
       console.log(`[${getCurrentTime()}] Выполнен выход пользователя с ID: ${userId}`);
-      res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'none', secure: true });
       return res.status(200).end();
     } catch (err) {
+      if (err.message === 'No data returned from the query.') {
+        console.error(`[${getCurrentTime()}] Данный токен не существует`);
+        return res.status(404).end();
+      }
       console.error(`[${getCurrentTime()}] Произошла ошибка при выходе пользователя ${err}.`);
       return res.status(500).end();
     }

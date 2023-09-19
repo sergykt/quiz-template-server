@@ -13,7 +13,6 @@ const tables = {
   questionsTable: 'questions',
   categoriesTable: 'categories',
   usersTable: 'users',
-  userRolesTable: 'user_roles',
   tokensTable: 'tokens',
 };
 
