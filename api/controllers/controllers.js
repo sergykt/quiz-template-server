@@ -7,7 +7,7 @@ const {
 } = require('../models/models');
 const { getCurrentTime, tokenService } = require('../services/services');
 
-const domain = process.env.NODE_ENV === 'production' ? '.vercel.app' : '.localhost';
+const domain = process.env.NODE_ENV === 'production' ? 'quiz-template-seven.vercel.app' : '.localhost';
 
 class QuestionController {
   async getAll(req, res) {
