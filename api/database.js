@@ -14,6 +14,7 @@ const tables = {
   categoriesTable: 'categories',
   usersTable: 'users',
   tokensTable: 'tokens',
+  resultsTable: 'results',
 };
 
 const db = pgp(dbPath);

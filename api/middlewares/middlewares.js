@@ -29,6 +29,18 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
+const adminMiddleware = (req, res, next) => {
+  const { id, userRoleId } = req.user;
+  if (req.method === 'OPTIONS') {
+    next();
+  }
+  if (userRoleId !== '1') {
+    console.error(`[${getCurrentTime()}] У пользователя с ID: ${id} нет прав доступа`);
+    return res.status(403).end();
+  }
+  next();
+};
+
 const validateResult = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -102,20 +114,26 @@ class UserMiddleware {
         return true;
       }),
     check('confirmPassword').notEmpty().withMessage('Password confirmation is required'),
-    validateResult,
+    validateResult
   ];
 
   validateLogin = [
     check('username').notEmpty().withMessage('Username is required'),
     check('password').notEmpty().withMessage('Password is required'),
-    validateResult,
+    validateResult
   ];
 
   validateDelete = [param('id').isInt().withMessage('ID must be an integer'), validateResult];
+
+  validateResults = [
+    check('points').notEmpty().withMessage('Points is required'),
+    validateResult
+  ];
 }
 
 module.exports.trimFields = trimFields;
 module.exports.authMiddleware = authMiddleware;
+module.exports.adminMiddleware = adminMiddleware;
 module.exports.questionMiddleware = new QuestionMiddleware();
 module.exports.categoryMiddleware = new CategoryMiddleware();
 module.exports.userMiddleware = new UserMiddleware();

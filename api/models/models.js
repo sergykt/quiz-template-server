@@ -6,6 +6,7 @@ const {
   categoriesTable,
   usersTable,
   tokensTable,
+  resultsTable,
 } = tables;
 
 class QuestionModel {
@@ -241,7 +242,32 @@ class TokenModel {
   }
 }
 
+class ResultModel {
+  constructor(table) {
+    this.table = table;
+  }
+
+  get = async (userId) => {
+    try {
+      return await db.any(`SELECT id, points, created_at AS date FROM ${this.table} WHERE user_id = $1 ORDER BY created_at ASC`, userId);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  create = async (userId, points) => {
+    try {
+      return await db.one(
+        `INSERT INTO ${this.table} (user_id, points) VALUES ($1, $2) returning id`,
+        [userId, points]);
+    } catch (err) {
+      throw err;
+    }
+  }
+}
+
 module.exports.questionModel = new QuestionModel(questionsTable);
 module.exports.categoryModel = new CategoryModel(categoriesTable);
 module.exports.userModel = new UserModel(usersTable);
 module.exports.tokenModel = new TokenModel(tokensTable);
+module.exports.resultModel = new ResultModel(resultsTable);

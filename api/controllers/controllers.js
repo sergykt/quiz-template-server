@@ -1,4 +1,10 @@
-const { questionModel, categoryModel, userModel, tokenModel } = require('../models/models');
+const {
+  questionModel,
+  categoryModel,
+  userModel,
+  tokenModel,
+  resultModel 
+} = require('../models/models');
 const { getCurrentTime, tokenService } = require('../services/services');
 
 class QuestionController {
@@ -260,6 +266,31 @@ class UserController {
         return res.status(401).end();
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при проверке refresh token ${err}.`);
+      return res.status(500).end();
+    }
+  }
+
+  async getResults(req, res) {
+    const { id } = req.user;
+    try {
+      const results = await resultModel.get(id);
+      console.log(`[${getCurrentTime()}] Успешно отправлены результаты пользователя с ID ${id}`);
+      return res.json(results);
+    } catch (err) {
+      console.error(`[${getCurrentTime()}] Произошла ошибка при отправлении результатов пользователя с ID: ${id} ${err}.`);
+      return res.status(500).end();
+    }
+  }
+
+  async addResults(req, res) {
+    const { id } = req.user;
+    const { points } = req.body;
+    try {
+      await resultModel.create(id, points);
+      console.log(`[${getCurrentTime()}] Успешно добавлены результаты пользователя с ID ${id}`);
+      return res.status(200).end();
+    } catch (err) {
+      console.error(`[${getCurrentTime()}] Произошла ошибка при добавлении результатов пользователя с ID: ${id} ${err}.`);
       return res.status(500).end();
     }
   }
