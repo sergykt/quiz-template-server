@@ -215,10 +215,10 @@ class UserController {
   async logout(req, res) {
     try {
       const { refreshToken } = req.cookies;
+      res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'None', secure: true });
       if (!refreshToken) {
         return res.status(404).end();
       }
-      res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'None', secure: true });
       const token = await tokenModel.findToken(refreshToken);
       const { user_id: userId } = token;
       await tokenModel.delete(userId);
