@@ -218,7 +218,7 @@ class UserController {
       if (!refreshToken) {
         return res.status(404).end();
       }
-      res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Lax', secure: true });
+      res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'None', secure: true });
       const token = await tokenModel.findToken(refreshToken);
       const { user_id: userId } = token;
       await tokenModel.delete(userId);
