@@ -179,7 +179,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newUser.id}.`);
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'Lax', httpOnly: true, secure: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'None', httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.code === '23505') {
@@ -200,7 +200,7 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'Lax', httpOnly: true, secure: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'None', httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.message === 'No data returned from the query.' || err.message === 'Wrong password') {
@@ -260,12 +260,12 @@ class UserController {
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Успешно обновлен access token `);
-      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'Lax', httpOnly: true, secure: true });
+      res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'None', httpOnly: true, secure: true });
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.message === 'Not valid refresh token') {
         console.error(`[${getCurrentTime()}] Невалидный refresh token ${err}.`);
-        res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Lax', secure: true });
+        res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'None', secure: true });
         return res.status(401).end();
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при проверке refresh token ${err}.`);
