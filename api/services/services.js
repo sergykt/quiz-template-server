@@ -14,7 +14,7 @@ const getCurrentTime = () => {
 
 class TokenService {
   generateAccessTokens(payload) {
-    const accessToken = jwt.sign(payload, secretKey, { expiresIn: '30m' });
+    const accessToken = jwt.sign(payload, secretKey, { expiresIn: '30s' });
     const refreshToken = jwt.sign(payload, refreshSecretKey, { expiresIn: '30d' });
 
     return { accessToken, refreshToken };
