@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const { tokenModel } = require('../models/models');
 
 const secretKey = process.env.JWT_ACCESS_SECRET;
@@ -49,5 +50,29 @@ class TokenService {
   }
 }
 
+class MailService {
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
+
+  async sendResults(to) {
+    await this.transporter.sendMail({
+      from: process.env.SMTP_EMAIL,
+      to,
+      subject: 'Отправка результатов квиза quiz-template',
+      text: 'проверка брат',
+    });
+  }
+}
+
 module.exports.getCurrentTime = getCurrentTime;
 module.exports.tokenService = new TokenService();
+module.exports.mailService = new MailService();

@@ -113,6 +113,7 @@ class UserMiddleware {
         }
         return true;
       }),
+    check('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Email is not valid'),
     check('confirmPassword').notEmpty().withMessage('Password confirmation is required'),
     validateResult
   ];
@@ -126,7 +127,8 @@ class UserMiddleware {
   validateDelete = [param('id').isInt().withMessage('ID must be an integer'), validateResult];
 
   validateResults = [
-    check('points').notEmpty().withMessage('Points is required'),
+    check('points').notEmpty().withMessage('Points is required')
+      .isInt().withMessage('Points must be an integer'),
     validateResult
   ];
 }

@@ -150,13 +150,13 @@ class UserModel {
   }
 
   create = async (body) => {
-    const { username, password } = body;
+    const { username, password, email } = body;
     const userRoleId = body.userRoleId || 2;
     try {
       const hashPassword = await bcrypt.hash(password, 8);
       const result = await db.one(
-        `INSERT INTO ${this.table} (username, password, user_role_id) VALUES ($1, $2, $3) RETURNING id, user_role_id, username`,
-        [username, hashPassword, userRoleId]
+        `INSERT INTO ${this.table} (username, password, email, user_role_id) VALUES ($1, $2, $3, $4) RETURNING id, user_role_id, username`,
+        [username, hashPassword, email, userRoleId]
       );
       return result;
     } catch (err) {

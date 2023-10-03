@@ -5,7 +5,7 @@ const {
   tokenModel,
   resultModel 
 } = require('../models/models');
-const { getCurrentTime, tokenService } = require('../services/services');
+const { getCurrentTime, tokenService, mailService } = require('../services/services');
 
 class QuestionController {
   async getAll(req, res) {
@@ -183,8 +183,8 @@ class UserController {
       return res.status(200).json({ accessToken: token.accessToken, username });
     } catch (err) {
       if (err.code === '23505') {
-        console.error(`[${getCurrentTime()}] Пользователь с таким именем уже зарегистрирован.`);
-        return res.status(409).json({ errors: 'This Username is not available' });
+        console.error(`[${getCurrentTime()}] Пользователь с таким именем или e-mail уже зарегистрирован.`);
+        return res.status(409).json({ errors: 'This Username or E-mail is not available' });
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при регистрации пользователя: ${err}.`);
       return res.status(500).end();
@@ -294,6 +294,20 @@ class UserController {
       return res.status(200).end();
     } catch (err) {
       console.error(`[${getCurrentTime()}] Произошла ошибка при добавлении результатов пользователя с ID: ${id} ${err}.`);
+      return res.status(500).end();
+    }
+  }
+
+  async sendResults(req, res) {
+    const { id } = req.user;
+    try {
+      const user = await userModel.get(id);
+      const { email } = user;
+      await mailService.sendResults(email);
+      console.log(`[${getCurrentTime()}] Успешно отправлены результаты на e-mail пользователя с ID ${id}`);
+      return res.status(200).end();
+    } catch (err) {
+      console.error(`[${getCurrentTime()}] Произошла ошибка при отправлении результатов на e-mail пользователя с ID: ${id} ${err}.`);
       return res.status(500).end();
     }
   }
