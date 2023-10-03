@@ -151,7 +151,7 @@ class UserModel {
 
   create = async (body) => {
     const { username, password, email } = body;
-    const userRoleId = body.userRoleId || 2;
+    const userRoleId = 2;
     try {
       const hashPassword = await bcrypt.hash(password, 8);
       const result = await db.one(
