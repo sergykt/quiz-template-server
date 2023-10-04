@@ -19,7 +19,7 @@ const addRoutes = (app) => {
   app.use(routes.categories(), categoryRouter);
   app.use(routes.users(), userRouter);
   app.use((req, res) => {
-    console.error(`[${getCurrentTime()}] Неправильная конечная точка`);
+    console.error(`[${getCurrentTime()}] Неправильный маршрут`);
     res.status(404).json('Not Found');
   });
 };

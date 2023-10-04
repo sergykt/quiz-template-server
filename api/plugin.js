@@ -1,6 +1,7 @@
 const morgan = require('morgan');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const { rateLimit } = require('express-rate-limit');
 const addRoutes = require('./routes/index');
 
 const plugin = async (app) => {
@@ -11,6 +12,14 @@ const plugin = async (app) => {
       credentials: true,
     };
 
+    const limiter = rateLimit({
+      windowMs: 60 * 1000,
+      limit: 100,
+      standardHeaders: 'draft-7',
+      legacyHeaders: false,
+    })
+
+    app.use(limiter);
     app.use(cookieParser());
     app.use(cors(corsOptions));
     app.use(morgan('combined'));
