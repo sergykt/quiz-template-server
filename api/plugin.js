@@ -17,8 +17,9 @@ const plugin = async (app) => {
       limit: 100,
       standardHeaders: 'draft-7',
       legacyHeaders: false,
-    })
+    });
 
+    app.set('trust proxy', 1);
     app.use(limiter);
     app.use(cookieParser());
     app.use(cors(corsOptions));

@@ -1,11 +1,24 @@
+const fs = require('node:fs/promises');
+const puppeteer = require('puppeteer')
+
 const {
   questionModel,
   categoryModel,
   userModel,
   tokenModel,
-  resultModel 
+  resultModel
 } = require('../models/models');
 const { getCurrentTime, tokenService, mailService } = require('../services/services');
+
+async function printPDF() {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.goto('https://quiz-template-seven.vercel.app/', { waitUntil: 'networkidle0' });
+  const pdf = await page.pdf({ format: 'A4'});
+
+  await browser.close();
+  return pdf;
+};
 
 class QuestionController {
   async getAll(req, res) {
@@ -300,10 +313,13 @@ class UserController {
 
   async sendResults(req, res) {
     const { id } = req.user;
+    const { htmlBody } = req.body;
     try {
       const user = await userModel.get(id);
       const { email } = user;
-      await mailService.sendResults(email);
+      await fs.writeFile('./result.html', htmlBody);
+      
+      //await mailService.sendResults(email);
       console.log(`[${getCurrentTime()}] Успешно отправлены результаты на e-mail пользователя с ID ${id}`);
       return res.status(200).end();
     } catch (err) {
