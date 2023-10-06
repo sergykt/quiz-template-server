@@ -308,8 +308,7 @@ class UserController {
     try {
       const user = await userModel.get(id);
       const { email, username } = user;
-      const pdfFile = req.file?.buffer;
-      await mailService.sendResults(username, email, pdfFile);
+      await mailService.sendResults(username, email, req.body);
       console.log(`[${getCurrentTime()}] Успешно отправлены результаты на e-mail пользователя с ID ${id}`);
       return res.status(200).end();
     } catch (err) {

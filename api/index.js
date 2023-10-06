@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5001;
 const app = express();
 app.use(bodyParser.json({limit: '10mb'}));
 app.use(bodyParser.urlencoded({limit: '10mb', extended: true}));
-
+app.use(bodyParser.raw({ type: 'application/octet-stream' , limit: '10mb' }));
 
 const start = async () => {
   try {

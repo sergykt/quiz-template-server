@@ -20,7 +20,7 @@ const plugin = async (app) => {
     });
 
     app.set('trust proxy', 1);
-    //app.use(limiter);
+    app.use(limiter);
     app.use(cookieParser());
     app.use(cors(corsOptions));
     app.use(morgan('combined'));

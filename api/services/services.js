@@ -68,7 +68,7 @@ class MailService {
       from: process.env.SMTP_EMAIL,
       to,
       subject: 'Отправка результатов квиза quiz-template',
-      text: 'проверка брат',
+      text: `Отправлены результатов пользователя ${username}`,
       attachments: {
         filename: 'quiz-results.pdf',
         content: attachment,
