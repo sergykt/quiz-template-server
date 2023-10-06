@@ -67,8 +67,8 @@ class MailService {
     await this.transporter.sendMail({
       from: process.env.SMTP_EMAIL,
       to,
-      subject: 'Отправка результатов квиза quiz-template',
-      text: `Отправлены результатов пользователя ${username}`,
+      subject: `Отправка результатов квиза quiz-template пользователя ${username}`,
+      text: '',
       attachments: {
         filename: 'quiz-results.pdf',
         content: attachment,
