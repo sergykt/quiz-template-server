@@ -1,7 +1,3 @@
-const fs = require('node:fs/promises');
-const puppeteer = require('puppeteer');
-const path = require('path');
-
 const {
   questionModel,
   categoryModel,
@@ -9,23 +5,12 @@ const {
   tokenModel,
   resultModel
 } = require('../models/models');
-const { getCurrentTime, tokenService, mailService } = require('../services/services');
-
-async function printPDF(id) {
-  const serverRoot = __dirname;
-  console.log(serverRoot);
-  const htmlFilePath = path.join(serverRoot, '../..', 'tmp', `result_${id}.html`);
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.goto(`file://${htmlFilePath}`, {
-    waitUntil: 'networkidle0',
-  });
-
-  const pdf = await page.pdf({ format: 'A4' });
-
-  await browser.close();
-  return pdf;
-};
+const {
+  getCurrentTime,
+  printPDF,
+  tokenService,
+  mailService
+} = require('../services/services');
 
 class QuestionController {
   async getAll(req, res) {
@@ -323,11 +308,9 @@ class UserController {
     const { htmlBody } = req.body;
     try {
       const user = await userModel.get(id);
-      const { email } = user;
-      await fs.writeFile(`./tmp/result_${id}.html`, htmlBody);
-      const pdfFile = await printPDF(id);
-      await fs.writeFile(`./tmp/result_${id}.pdf`, pdfFile);
-      //await mailService.sendResults(email);
+      const { email, username } = user;
+      const pdfFile = await printPDF(htmlBody);
+      await mailService.sendResults(username, email, pdfFile);
       console.log(`[${getCurrentTime()}] Успешно отправлены результаты на e-mail пользователя с ID ${id}`);
       return res.status(200).end();
     } catch (err) {
