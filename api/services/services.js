@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const puppeteer = require('puppeteer');
 const { tokenModel } = require('../models/models');
 
 const secretKey = process.env.JWT_ACCESS_SECRET;
@@ -12,16 +11,6 @@ const getCurrentTime = () => {
   const minutes = now.getMinutes().toString().padStart(2, '0');
   const seconds = now.getSeconds().toString().padStart(2, '0');
   return `${hours}:${minutes}:${seconds}`;
-};
-
-const printPDF = async (htmlBody) => {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.setContent(htmlBody);
-  const pdfBuffer = await page.pdf({ format: 'A4' });
-  await browser.close();
-
-  return pdfBuffer;
 };
 
 class TokenService {
@@ -89,6 +78,5 @@ class MailService {
 }
 
 module.exports.getCurrentTime = getCurrentTime;
-module.exports.printPDF = printPDF;
 module.exports.tokenService = new TokenService();
 module.exports.mailService = new MailService();

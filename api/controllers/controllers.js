@@ -305,11 +305,10 @@ class UserController {
 
   async sendResults(req, res) {
     const { id } = req.user;
-    const { htmlBody } = req.body;
     try {
       const user = await userModel.get(id);
       const { email, username } = user;
-      const pdfFile = await printPDF(htmlBody);
+      const pdfFile = req.file?.buffer;
       await mailService.sendResults(username, email, pdfFile);
       console.log(`[${getCurrentTime()}] Успешно отправлены результаты на e-mail пользователя с ID ${id}`);
       return res.status(200).end();
