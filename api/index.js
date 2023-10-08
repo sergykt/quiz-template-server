@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
-const addRoutes = require('./routes/index');
+const addRoutes = require('./router/index');
 
 const PORT = process.env.PORT || 5001;
 
@@ -25,7 +25,7 @@ const limiter = rateLimit({
 
 const app = express();
 app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '10mb' }));
 app.use(cookieParser());
 app.set('trust proxy', 1);

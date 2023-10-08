@@ -3,14 +3,15 @@ const {
   categoryModel,
   userModel,
   tokenModel,
-  resultModel
+  resultModel,
+  userLinkModel
 } = require('../models/models');
 const {
   getCurrentTime,
-  printPDF,
   tokenService,
   mailService
 } = require('../services/services');
+const routes = require('../router/routes');
 
 class QuestionController {
   async getAll(req, res) {
@@ -180,12 +181,15 @@ class UserController {
     const { body } = req;
     try {
       const newUser = await userModel.create(body);
-      const { id, user_role_id: userRoleId, username } = newUser;
+      const { id, user_role_id: userRoleId, username, email, isactive } = newUser;
+      const newLink = await userLinkModel.create(id);
+      const fullLink = `${process.env.API_URL}${routes.users()}/activate/${newLink}`;
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
+      await mailService.sendActivateLink(username, email, fullLink);
       console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newUser.id}.`);
       res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'None', httpOnly: true, secure: true });
-      return res.status(200).json({ accessToken: token.accessToken, username });
+      return res.status(201).json({ accessToken: token.accessToken, username, isactive });
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Пользователь с таким именем или e-mail уже зарегистрирован.`);
@@ -196,17 +200,39 @@ class UserController {
     }
   }
 
+  async activate(req, res) {
+    const link = req.params.link;
+    try {
+      const userId = await userLinkModel.getUserId(link);
+      if (!userId) {
+        console.error(`[${getCurrentTime()}] Ссылка недействительна`);
+        return res.status(404).send('Ссылка недействительна');
+      } 
+      const result = await userModel.activate(userId);
+      await userLinkModel.delete(link);
+      if (result) {
+        res.redirect(`${process.env.CLIENT_URL}/?activation=success`);
+      } else {
+        console.error(`[${getCurrentTime()}] Ссылка недействительна`);
+        return res.status(404).send('Ссылка недействительна');
+      }
+    } catch (err) {
+      console.error(`[${getCurrentTime()}] Произошла ошибка при активации ${err}.`);
+      return res.status(500).end();
+    }
+  }
+
   async login(req, res) {
     const { body } = req;
     const { username } = body;
     try {
       const user = await userModel.login(body);
-      const { id, user_role_id: userRoleId } = user;
+      const { id, user_role_id: userRoleId, isactive } = user;
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
       console.log(`[${getCurrentTime()}] Выполнен вход пользователя ${username}`);
       res.cookie('refreshToken', token.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'None', httpOnly: true, secure: true });
-      return res.status(200).json({ accessToken: token.accessToken, username });
+      return res.status(200).json({ accessToken: token.accessToken, username, isactive });
     } catch (err) {
       if (err.message === 'No data returned from the query.' || err.message === 'Wrong password') {
         console.error(`[${getCurrentTime()}] Неверные данные при выполнении входа ${username}`);

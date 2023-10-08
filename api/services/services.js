@@ -75,6 +75,19 @@ class MailService {
       }
     });
   }
+
+  async sendActivateLink(username, to, link) {
+    await this.transporter.sendMail({
+      from: process.env.SMTP_EMAIL,
+      to,
+      subject: `Ссылка для активации quiz-template пользователя ${username}`,
+      text: '',
+      html: `<p>Здравствуйте, ${username}!</p>
+      <p>Вы зарегистрировались на нашем сайте и теперь можете активировать свой профиль, перейдя по следующей ссылке:</p>
+      <a href="${link}">Активировать профиль</a>
+      <p>Если вы не регистрировались на нашем сайте, пожалуйста, проигнорируйте это сообщение.</p>`,
+    });
+  }
 }
 
 module.exports.getCurrentTime = getCurrentTime;

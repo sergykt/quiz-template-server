@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 const { db, tables } = require('../database');
 
 const {
@@ -7,6 +8,7 @@ const {
   usersTable,
   tokensTable,
   resultsTable,
+  userLinksTable,
 } = tables;
 
 class QuestionModel {
@@ -155,10 +157,19 @@ class UserModel {
     try {
       const hashPassword = await bcrypt.hash(password, 8);
       const result = await db.one(
-        `INSERT INTO ${this.table} (username, password, email, user_role_id) VALUES ($1, $2, $3, $4) RETURNING id, user_role_id, username`,
+        `INSERT INTO ${this.table} (username, password, email, user_role_id) VALUES ($1, $2, $3, $4) RETURNING id, user_role_id, username, email, isactive`,
         [username, hashPassword, email, userRoleId]
       );
       return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  activate = async (id) => {
+    try {
+      const result = await db.result(`UPDATE ${this.table} SET isactive = $1 WHERE id = $2`, [true, id]);
+      return result.rowCount > 0;
     } catch (err) {
       throw err;
     }
@@ -266,8 +277,45 @@ class ResultModel {
   }
 }
 
+class UserLinkModel {
+  constructor(table) {
+    this.table = table;
+  }
+
+  getUserId = async (link) => {
+    try {
+      const userData = await db.any(`SELECT user_id AS userid FROM ${this.table} WHERE link = $1`, link);
+      return userData.length > 0 ? userData[0].userid : null;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  create = async(userId) => {
+    try {
+      const hash = uuidv4();
+      await db.one(
+        `INSERT INTO ${this.table} (user_id, link) VALUES ($1, $2) returning id`,
+        [userId, hash]);
+      return hash;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  delete = async(link) => {
+    try {
+      const result = await db.result(`DELETE FROM ${this.table} WHERE link = $1`, link);
+      return result.rowCount > 0;
+    } catch (err) {
+      throw err;
+    }
+  }
+}
+
 module.exports.questionModel = new QuestionModel(questionsTable);
 module.exports.categoryModel = new CategoryModel(categoriesTable);
 module.exports.userModel = new UserModel(usersTable);
 module.exports.tokenModel = new TokenModel(tokensTable);
 module.exports.resultModel = new ResultModel(resultsTable);
+module.exports.userLinkModel = new UserLinkModel(userLinksTable);

@@ -3,15 +3,7 @@ const categoryRouter = require('./categoryRouter');
 const userRouter = require('./userRouter');
 const { trimFields } = require('../middlewares/middlewares');
 const { getCurrentTime } = require('../services/services');
-
-const apiPath = '/api';
-
-const routes = {
-  questions: () => [apiPath, 'questions'].join('/'),
-  categories: () => [apiPath, 'categories'].join('/'),
-  users: () => [apiPath, 'users'].join('/'),
-  userRoles: () => [apiPath, 'user_roles'].join('/'),
-};
+const routes = require('./routes');
 
 const addRoutes = (app) => {
   app.use(trimFields);
