@@ -168,8 +168,10 @@ class UserModel {
 
   activate = async (id) => {
     try {
-      const result = await db.result(`UPDATE ${this.table} SET isactive = $1 WHERE id = $2`, [true, id]);
-      return result.rowCount > 0;
+      return await db.one(
+        `UPDATE ${this.table} SET isactive = $1 WHERE id = $2 RETURNING *`,
+        [true, id]
+      );
     } catch (err) {
       throw err;
     }
