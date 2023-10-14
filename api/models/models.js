@@ -284,6 +284,15 @@ class UserLinkModel {
     this.table = table;
   }
 
+  getLink = async (id) => {
+    try {
+      const link = await db.oneOrNone(`SELECT link FROM ${this.table} WHERE user_id = $1`, id);
+      return link?.link;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   getUserId = async (link) => {
     try {
       const userData = await db.any(`SELECT user_id AS userid FROM ${this.table} WHERE link = $1`, link);
@@ -293,7 +302,7 @@ class UserLinkModel {
     }
   }
 
-  create = async(userId) => {
+  create = async (userId) => {
     try {
       const hash = uuidv4();
       await db.one(
@@ -305,7 +314,7 @@ class UserLinkModel {
     }
   }
 
-  delete = async(link) => {
+  delete = async (link) => {
     try {
       const result = await db.result(`DELETE FROM ${this.table} WHERE link = $1`, link);
       return result.rowCount > 0;

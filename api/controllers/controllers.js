@@ -11,7 +11,6 @@ const {
   tokenService,
   mailService
 } = require('../services/services');
-const routes = require('../router/routes');
 
 class QuestionController {
   async getAll(req, res) {
@@ -185,8 +184,8 @@ class UserController {
       const newLink = await userLinkModel.create(id);
       const fullLink = `${process.env.CLIENT_URL}/verify/?verifyToken=${newLink}`;
       await mailService.sendActivateLink(username, email, fullLink);
-      console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${newUser.id}.`);
-      return res.status(201).end();
+      console.log(`[${getCurrentTime()}] Добавлен новый пользователь с ID: ${id}.`);
+      return res.status(201).json({ id });
     } catch (err) {
       if (err.code === '23505') {
         console.error(`[${getCurrentTime()}] Пользователь с таким именем или e-mail уже зарегистрирован.`);
@@ -231,7 +230,7 @@ class UserController {
       const { id, user_role_id: userRoleId, isactive } = user;
       if (!isactive) {
         console.log(`[${getCurrentTime()}] Пользователь ${username} не подтвержден`);
-        return res.status(403).end();
+        return res.status(403).json({ id });
       }
       const token = tokenService.generateAccessTokens({ id, userRoleId });
       await tokenService.saveToken(id, token.refreshToken);
@@ -266,6 +265,22 @@ class UserController {
         return res.status(404).end();
       }
       console.error(`[${getCurrentTime()}] Произошла ошибка при выходе пользователя ${err}.`);
+      return res.status(500).end();
+    }
+  }
+
+  async sendLink(req, res) {
+    const { id } = req.body;
+    try {
+      const user = await userModel.get(id);
+      const { username, email } = user;
+      const link = await userLinkModel.getLink(id);
+      const fullLink = `${process.env.CLIENT_URL}/verify/?verifyToken=${link}`;
+      await mailService.sendActivateLink(username, email, fullLink);
+      console.log(`[${getCurrentTime()}] Отправлено письмо для верификации пользователя с ID: ${id}.`);
+      return res.status(200).end();
+    } catch (err) {
+      console.error(`[${getCurrentTime()}] Не удалось отправить ссылку для верификации пользователя с ID ${id} ${err}.`);
       return res.status(500).end();
     }
   }
